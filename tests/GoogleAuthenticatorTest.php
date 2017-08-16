@@ -33,10 +33,51 @@ class GoogleAuthenticatorTest extends \PHPUnit_Framework_TestCase
         );
     }
 
-    public function testGetCode()
+    public function testCheckCode()
     {
+        $authenticator = new GoogleAuthenticator(6, 10, new \DateTime('2012-03-17 22:17:00'));
         $this->assertTrue(
-            $this->helper->checkCode('3DHTQX4GCRKHGS55CJ', $this->helper->getCode('3DHTQX4GCRKHGS55CJ', strtotime('17/03/2012 22:17')))
+            $authenticator->checkCode('3DHTQX4GCRKHGS55CJ', $authenticator->getCode('3DHTQX4GCRKHGS55CJ', strtotime('2012-03-17 22:17:00') / 30))
+        );
+    }
+
+    public function testCheckCodeTooOld()
+    {
+        $authenticator = new GoogleAuthenticator(6, 10, new \DateTime('2012-03-17 22:17:00'));
+        $this->assertFalse(
+            $authenticator->checkCode('3DHTQX4GCRKHGS55CJ', $authenticator->getCode('3DHTQX4GCRKHGS55CJ', strtotime('2012-03-17 22:18:00') / 30))
+        );
+    }
+
+    public function testCheckCodePlusOne()
+    {
+        $authenticator = new GoogleAuthenticator(6, 10, new \DateTime('2012-03-17 22:17:00'));
+        $this->assertTrue(
+            $authenticator->checkCode('3DHTQX4GCRKHGS55CJ', $authenticator->getCode('3DHTQX4GCRKHGS55CJ', strtotime('2012-03-17 22:17:30') / 30))
+        );
+    }
+
+    public function testCheckCodeMinusOne()
+    {
+        $authenticator = new GoogleAuthenticator(6, 10, new \DateTime('2012-03-17 22:17:00'));
+        $this->assertTrue(
+            $authenticator->checkCode('3DHTQX4GCRKHGS55CJ', $authenticator->getCode('3DHTQX4GCRKHGS55CJ', strtotime('2012-03-17 22:16:30') / 30))
+        );
+    }
+
+    public function testCheckCodeTooYoung()
+    {
+        $authenticator = new GoogleAuthenticator(6, 10, new \DateTime('2012-03-17 22:17:00'));
+        $this->assertFalse(
+            $authenticator->checkCode('3DHTQX4GCRKHGS55CJ', $authenticator->getCode('3DHTQX4GCRKHGS55CJ', strtotime('2012-03-17 22:16:29') / 30))
+        );
+    }
+
+    public function testCheckCodeWithInvalidDateArgument()
+    {
+        $authenticator = new GoogleAuthenticator(6, 10, new \DateTime());
+        $this->assertFalse(
+            $authenticator->checkCode('3DHTQX4GCRKHGS55CJ', $authenticator->getCode('3DHTQX4GCRKHGS55CJ', false))
         );
     }
 
